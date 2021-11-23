@@ -1,26 +1,250 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="Welcome to Your Vue.js App" />
+  <div class="container">
+    <div class="title">Отслеживание статуса заправки и ремонта картриджей</div>
+    <div class="logo">
+      <img class="imglogo" src="./assets/logo2.png" alt="logo" />
+    </div>
+  </div>
+  <div class="contain">
+    <vue-good-table
+      :columns="columns"
+      :rows="jobs"
+      theme="polar-bear"
+      :paginate="false"
+      v-on:row-click="onRowClick"
+    />
+  </div>
+  <div class="date">Информация обновлена 03.11.2021 г. 09:50</div>
+  <div class="date">Версия 0.6 vgtn от 18.11.2021 г.</div>
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
+import { VueGoodTable } from "vue-good-table-next";
+import "vue-good-table-next/dist/vue-good-table-next.css";
 
 export default {
-  name: "App",
   components: {
-    HelloWorld,
+    VueGoodTable,
+  },
+  name: "App",
+  data() {
+    return {
+      columns: [
+        {
+          label: "№",
+          field: "id",
+        },
+        {
+          label: "Пользователь",
+          field: "username",
+        },
+        {
+          label: "Модель принтера",
+          field: "printer",
+          filterable: true,
+        },
+        {
+          label: "Тип картриджа",
+          field: "cartridge",
+          filterable: true,
+        },
+        {
+          label: "Статус",
+          field: "workstatus",
+          filterable: true,
+        },
+        {
+          label: "Местонахождение",
+          field: "location",
+          filterable: true,
+        },
+        {
+          label: "Дата",
+          field: "date",
+          filterable: true,
+        },
+        {
+          label: "Примечание",
+          field: "comment",
+          filterable: true,
+        },
+      ],
+      jobs: [],
+      counts: "",
+      editmode: false,
+    };
+  },
+  methods: {
+    recordsCount() {
+      this.counts = this.jobs.length;
+    },
+    onRowClick(params) {
+      // params.row - row object
+      // params.pageIndex - index of this row on the current page.
+      // params.selected - if selection is enabled this argument
+      // indicates selected or not
+      // params.event - click event
+
+      let currentRow = params.event.target.closest("tr");
+
+      if (this.editmode) {
+        console.log("Edit mode on");
+      } else {
+        this.editmode = true;
+        // в первом столбце добавляется кнопка "Сохранить"
+        currentRow.cells[0].innerHTML = "<span>Save</span>";
+
+        for (let i = 1; i <= 7; i++) {
+          let textInput = document.createElement("input");
+          textInput.value = currentRow.cells[i].textContent;
+          currentRow.cells[i].innerHTML = "";
+          currentRow.cells[i].appendChild(textInput);
+        }
+      }
+
+      // let textInput = document.createElement("input");
+      //         textInput.value = td.textContent;
+      //         td.innerHTML = "";
+      //         td.appendChild(textInput);
+    },
+  },
+  async created() {
+    const data_url = "http://localhost/mprint/cart.json";
+    const response = await fetch(data_url);
+    const data = await response.json();
+    this.jobs = data.mprint;
+    this.recordsCount();
   },
 };
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+.logo {
+  /* width: 100%; */
   text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  margin: 50px 0;
+}
+.logo img.imglogo {
+  width: 80px;
+  height: 80px;
+  margin: auto;
+}
+.edit {
+  width: 13px;
+  height: 13px;
+  margin-left: 4px;
+  padding-right: 7px;
+  display: block;
+}
+.save {
+  width: 20px;
+  height: 20px;
+  padding-right: 7px;
+  display: block;
+}
+.hide {
+  display: none;
+}
+.container,
+.contain {
+  width: 90%;
+  margin: auto;
+}
+.title {
+  margin-top: 40px;
+  font-size: 1.2em;
+  font-weight: 700;
+  text-align: center;
+}
+.status-table {
+  display: flex;
+  flex-direction: column;
+}
+.row {
+  height: 20px;
+  align-items: center;
+  text-align: center;
+  font-size: 1.1em;
+  margin-bottom: 5px;
+}
+.inprocess {
+  color: mediumvioletred;
+}
+.ready {
+  color: mediumseagreen;
+}
+.waiting {
+  color: black;
+}
+.done {
+  color: rgb(34, 175, 53);
+}
+.date {
+  margin-top: 50px;
+  text-align: center;
+  font-size: 0.9em;
+}
+.table {
+  width: 96%;
+  margin: auto;
+  margin-bottom: 20px;
+  border-collapse: collapse;
+}
+.table th {
+  font-weight: bold;
+  padding: 5px 15px;
+  background: #c7fcef;
+  border: 1px solid #dddddd;
+  border-left: none;
+  border-right: none;
+  text-align: left;
+}
+.table td {
+  font-size: 0.9em;
+  border: 1px solid #dddddd;
+  padding: 5px 15px;
+  border-left: none;
+  border-right: none;
+}
+.table tr td:first-child,
+.table tr th:first-child {
+  border-left: none;
+}
+.table tr td:last-child,
+.table tr th:last-child {
+  border-right: none;
+}
+/* Remove outline on the forms and links */
+:active,
+:hover,
+:focus {
+  outline: 0;
+  outline-offset: 0;
+}
+input {
+  border: none;
+  border-bottom: 1px solid rgb(255, 171, 138);
+  margin: 0;
+  padding: 0;
+  display: block;
+  outline: none;
+  color: rgb(231, 45, 45);
+  font-size: 1em;
+}
+textarea {
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: block;
+  /* отключаем изменение размера мышью в Firefox */
+  resize: none;
+
+  /* удаляем обводку при фокусировке в Chrome */
+  outline: none;
+  position: relative;
+  padding: 0;
 }
 </style>

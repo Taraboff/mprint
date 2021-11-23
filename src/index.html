@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статус картриджа</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="title">Отслеживание статуса заправки и ремонта картриджей</div>
+        <div class="logo">
+            <img class="imglogo" src="./assets/logo2.png" alt="logo">
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Пользователь</th>
+                    <th>Модель принтера</th>
+                    <th>Тип картриджа</th>
+                    <th>Статус</th>
+                    <th>Местонахождение</th>
+                    <th>Дата</th>
+                    <th>Примечание</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="done" data-id="1">
+                    <td>1</td>
+                    <td>Приемная</td>
+                    <td>МФУ Canon MF443</td>
+                    <td>картридж 057</td>
+                    <td>Заправлен</td>
+                    <td>Приемная</td>
+                    <td>01.11.2021</td>
+                    <td></td>
+                    <td data-id="135" class="commands"><a href="#"><img class="edit" src="assets/edit.svg"></a><a href="#"><img
+                                    class="save hide" src="assets/save.png"></a></td>
+                </tr>
+                <tr class="done" data-id="2">
+                    <td>2</td>
+                    <td>ЦТО</td>
+                    <td>МФУ Canon MF443</td>
+                    <td>картридж 057</td>
+                    <td>Заправлен</td>
+                    <td>ЦТО</td>
+                    <td>01.11.2021</td>
+                    <td></td>
+                    <td class="commands"><span><a href="#"><img class="edit" src="assets/edit.svg"></a><a href="#"><img
+                                    class="save hide" src="assets/save.png"></a></span></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>Коровина И.С.</td>
+                    <td>HP 2420</td>
+                    <td></td>
+                    <td>Требует заправки</td>
+                    <td>Абон.отдел</td>
+                    <td></td>
+                    <td></td>
+                    <td class="commands"><span><a href="#"><img class="edit" src="assets/edit.svg"></a><a href="#"><img
+                                    class="save hide" src="assets/save.png"></a></span></td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>Фомин В.Н.</td>
+                    <td>Canon MF4018</td>
+                    <td>FX-10</td>
+                    <td>Требует заправки</td>
+                    <td>Метрология</td>
+                    <td></td>
+                    <td></td>
+                    <td class="commands"><span><a href="#"><img class="edit" src="assets/edit.svg"></a><a href="#"><img
+                                    class="save hide" src="assets/save.png"></a></span></td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>Агапов А.П.</td>
+                    <td>HP P1005</td>
+                    <td>725</td>
+                    <td>В ожидании заправки/ремонта</td>
+                    <td>Дом связи</td>
+                    <td></td>
+                    <td></td>
+                    <td class="commands"><span><a href="#"><img class="edit" src="assets/edit.svg"></a><a href="#"><img
+                                    class="save hide" src="assets/save.png"></a></span></td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>Гурьянов Л.А.</td>
+                    <td>HP MFP 1536</td>
+                    <td>728</td>
+                    <td>В ожидании заправки/ремонта</td>
+                    <td>Дом связи</td>
+                    <td></td>
+                    <td></td>
+                    <td class="commands"><span><a href="#"><img class="edit" src="assets/edit.svg"></a><a href="#"><img
+                                    class="save hide" src="assets/save.png"></a></span></td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>Серикова А.Н.</td>
+                    <td>Canon LBP2900</td>
+                    <td>2612</td>
+                    <td>В ожидании заправки/ремонта</td>
+                    <td>Дом связи</td>
+                    <td></td>
+                    <td></td>
+                    <td class="commands"><span><a href="#"><img class="edit" src="assets/edit.svg"></a><a href="#"><img
+                                    class="save hide" src="assets/save.png"></a></span></td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>Рогова Н.А.</td>
+                    <td>HP 1018</td>
+                    <td>2612</td>
+                    <td>Заливает лист серым фоном. Требует ремонта</td>
+                    <td>Дом связи</td>
+                    <td></td>
+                    <td></td>
+                    <td class="commands"><span><a href="#"><img class="edit" src="assets/edit.svg"></a><a href="#"><img
+                                    class="save hide" src="assets/save.png"></a></span></td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>Чепрасова Ю.А.</td>
+                    <td>HP 1018</td>
+                    <td>2612</td>
+                    <td>В ожидании заправки/ремонта</td>
+                    <td>Дом связи</td>
+                    <td></td>
+                    <td></td>
+                    <td class="commands"><span><a href="#"><img class="edit" src="assets/edit.svg"></a><a href="#"><img
+                                    class="save hide" src="assets/save.png"></a></span></td>
+                </tr>
+                <tr class="done">
+                    <td>10</td>
+                    <td>Мелашенко С.В.</td>
+                    <td>Canon MF4018</td>
+                    <td>FX-10</td>
+                    <td>Заправлен. Заменен фотобарабан</td>
+                    <td>Отдел кадров</td>
+                    <td>03.11.2021</td>
+                    <td></td>
+                    <td class="commands"><span><a href="#"><img class="edit" src="assets/edit.svg"></a><a href="#"><img
+                                    class="save hide" src="assets/save.png"></a></span></td>
+                </tr>
+                <tr class="done">
+                    <td>11</td>
+                    <td>Лотц Л.П.</td>
+                    <td>HP P1005</td>
+                    <td>725</td>
+                    <td>Заправлен</td>
+                    <td>Лотц Л.П.</td>
+                    <td>03.11.2021</td>
+                    <td></td>
+                    <td class="commands"><span><a href="#"><img class="edit" src="assets/edit.svg"></a><a href="#"><img
+                                    class="save hide" src="assets/save.png"></a></span></td>
+                </tr>
+                <tr>
+                    <td>12</td>
+                    <td>Дегтярёва Ю.В. (резерв)</td>
+                    <td>HP P1005</td>
+                    <td>725</td>
+                    <td>В ожидании заправки/ремонта</td>
+                    <td>Дом связи</td>
+                    <td></td>
+                    <td></td>
+                    <td class="commands"><span><a href="#"><img class="edit" src="assets/edit.svg"></a><a href="#"><img
+                                    class="save hide" src="assets/save.png"></a></span></td>
+                </tr>
+                <tr data-id="13">
+                    <td>13</td>
+                    <td><input type="text" name="input" value=""></input>
+                    </td>
+                    <td>
+                        <input></input>
+                    </td>
+                    <td><input></input></td>
+                    <td><input></input></td>
+                    <td><input></input></td>
+                    <td><input></input></td>
+                    <td><input></input></td>
+                    <td class="commands"><span><a href="#"><img class="save" src="assets/save.png"></a></span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="date">Информация обновлена 03.11.2021 г. 09:50</div>
+        <div class="date">Версия 0.5 от 16.11.2021 г.</div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
