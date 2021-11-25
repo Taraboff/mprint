@@ -109,7 +109,9 @@ export default {
     },
   },
   async created() {
-    const data_url = "http://localhost/mprint/cart.json";
+    // data_url устанавливается в завистмости от среды разработки
+    // const data_url = "http://192.168.1.252:8181/mprint/cart.json";
+    const data_url = "http://localhost:8080/cart.json";
     const response = await fetch(data_url);
     const data = await response.json();
     this.jobs = data.mprint;
