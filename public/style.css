@@ -114,8 +114,12 @@ textarea {
     margin: 0;
     padding: 0;
     display: block;
+    color: rgb(231, 45, 45);
+    border-bottom: 1px solid rgb(255, 171, 138);
+    font-size: 1em;
       /* отключаем изменение размера мышью в Firefox */
   resize: none;
+  font-family: Arial, Helvetica, sans-serif;
 
   /* удаляем обводку при фокусировке в Chrome */
   outline: none;

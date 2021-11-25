@@ -12,10 +12,11 @@
       theme="polar-bear"
       :paginate="false"
       v-on:row-click="onRowClick"
+      v-on:keyup.enter="saveRow"
     />
   </div>
   <div class="date">Информация обновлена 03.11.2021 г. 09:50</div>
-  <div class="date">Версия 0.6 vgtn от 18.11.2021 г.</div>
+  <div class="date">Версия{{ version }}</div>
 </template>
 
 <script>
@@ -29,6 +30,7 @@ export default {
   name: "App",
   data() {
     return {
+      version: " 0.6 vgtn от 25.11.2021 г.",
       columns: [
         {
           label: "№",
@@ -72,11 +74,18 @@ export default {
       jobs: [],
       counts: "",
       editmode: false,
+      editedRowObject: "",
     };
   },
   methods: {
     recordsCount() {
       this.counts = this.jobs.length;
+    },
+    saveRow() {
+      // перебор всех inputs в строке таблицы и сохранение элемента в массив jobs
+
+      console.log(this.editedRowObject);
+      // this.editmode = false;
     },
     onRowClick(params) {
       // params.row - row object
@@ -87,31 +96,30 @@ export default {
 
       let currentRow = params.event.target.closest("tr");
 
+      console.log("currentRow: ", currentRow.cells[2].children[0].value);
+
       if (this.editmode) {
         console.log("Edit mode on");
       } else {
         this.editmode = true;
         // в первом столбце добавляется кнопка "Сохранить"
-        currentRow.cells[0].innerHTML = "<span>Save</span>";
+        currentRow.cells[0].innerHTML = "<button>сохр</button>";
 
-        for (let i = 1; i <= 7; i++) {
-          let textInput = document.createElement("input");
+        for (let i = 4; i <= 4; i++) {
+          let textInput = document.createElement("textarea");
+          // textInput.type = "text";
+          textInput.size = "30";
           textInput.value = currentRow.cells[i].textContent;
           currentRow.cells[i].innerHTML = "";
-          currentRow.cells[i].appendChild(textInput);
+          currentRow.cells[i].append(textInput);
         }
       }
-
-      // let textInput = document.createElement("input");
-      //         textInput.value = td.textContent;
-      //         td.innerHTML = "";
-      //         td.appendChild(textInput);
     },
   },
   async created() {
     // data_url устанавливается в завистмости от среды разработки
     // const data_url = "http://192.168.1.252:8181/mprint/cart.json";
-    const data_url = "http://localhost:8080/cart.json";
+    const data_url = "http://localhost/mprint/cart.json";
     const response = await fetch(data_url);
     const data = await response.json();
     this.jobs = data.mprint;
