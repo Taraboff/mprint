@@ -15,6 +15,7 @@
       v-on:keyup.enter="saveRow"
     />
   </div>
+  <div class="savebutton" v-if="showSaveButton"><button>сохр</button></div>
   <div class="date">Информация обновлена 03.11.2021 г. 09:50</div>
   <div class="date">Версия{{ version }}</div>
 </template>
@@ -75,6 +76,9 @@ export default {
       counts: "",
       editmode: false,
       editedRowObject: "",
+      showSaveButton: false,
+      btnX: "",
+      btnY: "",
     };
   },
   methods: {
@@ -93,19 +97,23 @@ export default {
       // params.selected - if selection is enabled this argument
       // indicates selected or not
       // params.event - click event
+      this.btnX = params.event.clientX;
+      this.btnY = params.event.clientY;
+      this.showSaveButton = true;
 
+      console.log(params);
       let currentRow = params.event.target.closest("tr");
 
-      console.log("currentRow: ", currentRow.cells[2].children[0].value);
+      // console.log("currentRow: ", currentRow.cells[2].children[0].value);
 
       if (this.editmode) {
         console.log("Edit mode on");
       } else {
         this.editmode = true;
         // в первом столбце добавляется кнопка "Сохранить"
-        currentRow.cells[0].innerHTML = "<button>сохр</button>";
+        currentRow.cells[0].innerHTML = `<button id="${params.row.id}">сохр</button>`;
 
-        for (let i = 4; i <= 4; i++) {
+        for (let i = 1; i <= 7; i++) {
           let textInput = document.createElement("textarea");
           // textInput.type = "text";
           textInput.size = "30";
@@ -256,5 +264,10 @@ textarea {
   outline: none;
   position: relative;
   padding: 0;
+}
+.savebutton {
+  position: relative;
+  top: 400px;
+  left: 50px;
 }
 </style>
