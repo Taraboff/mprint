@@ -5,17 +5,25 @@
       <img class="imglogo" src="./assets/logo2.png" alt="logo" />
     </div>
   </div>
+  <div
+    class="savebutton"
+    :style="{ left: btnX, top: btnY + 'px' }"
+    v-if="showSaveButton"
+    @click="saveTask"
+  >
+    <button>сохр</button>
+  </div>
   <div class="contain">
     <vue-good-table
       :columns="columns"
-      :rows="jobs"
+      :rows="tasks"
       theme="polar-bear"
       :paginate="false"
       v-on:row-click="onRowClick"
-      v-on:keyup.enter="saveRow"
+      v-on:keyup.enter="saveTask"
     />
   </div>
-  <div class="savebutton" v-if="showSaveButton"><button>сохр</button></div>
+
   <div class="date">Информация обновлена 03.11.2021 г. 09:50</div>
   <div class="date">Версия{{ version }}</div>
 </template>
@@ -31,7 +39,7 @@ export default {
   name: "App",
   data() {
     return {
-      version: " 0.6 vgtn от 25.11.2021 г.",
+      version: " 0.6.2 vgtn от 03.12.2021 г.",
       columns: [
         {
           label: "№",
@@ -72,23 +80,23 @@ export default {
           filterable: true,
         },
       ],
-      jobs: [],
+      tasks: [],
       counts: "",
       editmode: false,
       editedRowObject: "",
       showSaveButton: false,
-      btnX: "",
-      btnY: "",
+      btnX: "4px",
+      btnY: 0,
     };
   },
   methods: {
     recordsCount() {
-      this.counts = this.jobs.length;
+      this.counts = this.tasks.length;
     },
-    saveRow() {
+    saveTask() {
       // перебор всех inputs в строке таблицы и сохранение элемента в массив jobs
 
-      console.log(this.editedRowObject);
+      console.log("Сохранение записи...");
       // this.editmode = false;
     },
     onRowClick(params) {
@@ -97,9 +105,6 @@ export default {
       // params.selected - if selection is enabled this argument
       // indicates selected or not
       // params.event - click event
-      this.btnX = params.event.clientX;
-      this.btnY = params.event.clientY;
-      this.showSaveButton = true;
 
       console.log(params);
       let currentRow = params.event.target.closest("tr");
@@ -109,9 +114,12 @@ export default {
       if (this.editmode) {
         console.log("Edit mode on");
       } else {
+        this.btnX = params.event.clientX;
+        this.btnY = params.event.clientY + 8;
+        this.showSaveButton = true;
         this.editmode = true;
         // в первом столбце добавляется кнопка "Сохранить"
-        currentRow.cells[0].innerHTML = `<button id="${params.row.id}">сохр</button>`;
+        currentRow.cells[0].innerHTML = params.row.id;
 
         for (let i = 1; i <= 7; i++) {
           let textInput = document.createElement("textarea");
@@ -127,10 +135,11 @@ export default {
   async created() {
     // data_url устанавливается в завистмости от среды разработки
     // const data_url = "http://192.168.1.252:8181/mprint/cart.json";
-    const data_url = "http://localhost/mprint/cart.json";
+    const data_url = "http://localhost:8080/cart.json"; // разработка на iPC
+    // const data_url = "http://localhost/mprint/cart.json";  // разработка at home
     const response = await fetch(data_url);
     const data = await response.json();
-    this.jobs = data.mprint;
+    this.tasks = data.mprint;
     this.recordsCount();
   },
 };
@@ -267,7 +276,5 @@ textarea {
 }
 .savebutton {
   position: relative;
-  top: 400px;
-  left: 50px;
 }
 </style>
