@@ -17,6 +17,7 @@
     <vue-good-table
       :columns="columns"
       :rows="tasks"
+      :key="appKey"
       theme="polar-bear"
       :paginate="false"
       v-on:row-click="onRowClick"
@@ -80,9 +81,11 @@ export default {
           filterable: true,
         },
       ],
+      appKey: 0,
       tasks: [],
       counts: "",
       editmode: false,
+      row: {},
       editedRowObject: "",
       showSaveButton: false,
       btnX: "4px",
@@ -94,19 +97,22 @@ export default {
       this.counts = this.tasks.length;
     },
     saveTask() {
-      // перебор всех inputs в строке таблицы и сохранение элемента в массив jobs
-
+      // перебор всех inputs в строке таблицы и сохранение элемента в массив tasks
+      this.editmode = false;
       console.log("Сохранение записи...");
-      // this.editmode = false;
+      console.log(this.row.cartridge);
+      this.appKey++;
     },
     onRowClick(params) {
       // params.row - row object
+      console.log("params.row: ", params.row.id);
+      this.row = params.row;
       // params.pageIndex - index of this row on the current page.
       // params.selected - if selection is enabled this argument
       // indicates selected or not
       // params.event - click event
 
-      console.log(params);
+      // console.log(params);
       let currentRow = params.event.target.closest("tr");
 
       // console.log("currentRow: ", currentRow.cells[2].children[0].value);
@@ -130,6 +136,7 @@ export default {
           currentRow.cells[i].append(textInput);
         }
       }
+      this.inputs = [...document.querySelectorAll("textarea")];
     },
   },
   async created() {
@@ -273,8 +280,11 @@ textarea {
   outline: none;
   position: relative;
   padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  color: rgb(231, 45, 45);
+  font-size: 1em;
 }
 .savebutton {
-  position: relative;
+  position: fixed;
 }
 </style>
