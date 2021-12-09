@@ -40,10 +40,10 @@ export default {
   name: "App",
   data() {
     return {
-      version: " 0.6.2 vgtn от 03.12.2021 г.",
+      version: " 0.6.3 my от 09.12.2021 г.",
       columns: [
         {
-          label: "№",
+          label: "№ заявки",
           field: "id",
         },
         {
@@ -72,7 +72,7 @@ export default {
         },
         {
           label: "Дата",
-          field: "date",
+          field: "datein",
           filterable: true,
         },
         {
@@ -93,29 +93,22 @@ export default {
     };
   },
   methods: {
-    recordsCount() {
-      this.counts = this.tasks.length;
-    },
     saveTask() {
       // перебор всех inputs в строке таблицы и сохранение элемента в массив tasks
       this.editmode = false;
       console.log("Сохранение записи...");
-      console.log(this.row.cartridge);
+      // console.log(this.row.cartridge);
       this.appKey++;
     },
     onRowClick(params) {
       // params.row - row object
-      console.log("params.row: ", params.row.id);
       this.row = params.row;
       // params.pageIndex - index of this row on the current page.
       // params.selected - if selection is enabled this argument
       // indicates selected or not
       // params.event - click event
 
-      // console.log(params);
       let currentRow = params.event.target.closest("tr");
-
-      // console.log("currentRow: ", currentRow.cells[2].children[0].value);
 
       if (this.editmode) {
         console.log("Edit mode on");
@@ -124,7 +117,7 @@ export default {
         this.btnY = params.event.clientY + 8;
         this.showSaveButton = true;
         this.editmode = true;
-        // в первом столбце добавляется кнопка "Сохранить"
+        // перед первым столбцом добавляется кнопка "Сохранить"
         currentRow.cells[0].innerHTML = params.row.id;
 
         for (let i = 1; i <= 7; i++) {
@@ -142,12 +135,12 @@ export default {
   async created() {
     // data_url устанавливается в завистмости от среды разработки
     // const data_url = "http://192.168.1.252:8181/mprint/cart.json";
-    const data_url = "http://localhost:8080/cart.json"; // разработка на iPC
+    const data_url = "http://localhost:8181/mprintinit"; // разработка на iPC
     // const data_url = "http://localhost/mprint/cart.json";  // разработка at home
     const response = await fetch(data_url);
     const data = await response.json();
-    this.tasks = data.mprint;
-    this.recordsCount();
+
+    this.tasks = data;
   },
 };
 </script>
