@@ -7,11 +7,11 @@
   </div>
   <div
     class="savebutton"
-    :style="{ left: btnX, top: btnY + 'px' }"
+    :style="{ top: btnY + 'px' }"
     v-if="showSaveButton"
     @click="saveTask"
   >
-    <button>сохр</button>
+    <a href="" class="saveicon far fa-save"></a>
   </div>
   <div class="contain">
     <vue-good-table
@@ -40,10 +40,10 @@ export default {
   name: "App",
   data() {
     return {
-      version: " 0.6.3 my от 09.12.2021 г.",
+      version: " 0.7 faw от 12.12.2021 г.",
       columns: [
         {
-          label: "№ заявки",
+          label: "№",
           field: "id",
         },
         {
@@ -73,7 +73,9 @@ export default {
         {
           label: "Дата",
           field: "datein",
+          type: "date",
           filterable: true,
+          formatFn: this.formatDate,
         },
         {
           label: "Примечание",
@@ -86,19 +88,43 @@ export default {
       counts: "",
       editmode: false,
       row: {},
-      editedRowObject: "",
       showSaveButton: false,
-      btnX: "4px",
       btnY: 0,
     };
   },
   methods: {
-    saveTask() {
+    formatDate(val) {
+      const date = new Date(val);
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      return `${day}.${month}.${year}`;
+    },
+    async saveTask() {
       // перебор всех inputs в строке таблицы и сохранение элемента в массив tasks
       this.editmode = false;
       console.log("Сохранение записи...");
-      // console.log(this.row.cartridge);
-      this.appKey++;
+      console.log(JSON.stringify(this.row));
+      try {
+        const response = await fetch(`http://localhost:8182/mprintupdate`, {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json;charset=utf-8'
+          },
+          mode: "no-cors",
+          
+          body: JSON.stringify(JSON.stringify(this.row)),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          console.log("data: ", data.bd);
+        }
+      } catch (e) {
+        console.log("e: ", e);
+      }
+
+      this.showSaveButton = false;
+      // this.appKey++;
     },
     onRowClick(params) {
       // params.row - row object
@@ -113,8 +139,7 @@ export default {
       if (this.editmode) {
         console.log("Edit mode on");
       } else {
-        this.btnX = params.event.clientX;
-        this.btnY = params.event.clientY + 8;
+        this.btnY = params.event.clientY;
         this.showSaveButton = true;
         this.editmode = true;
         // перед первым столбцом добавляется кнопка "Сохранить"
@@ -135,10 +160,11 @@ export default {
   async created() {
     // data_url устанавливается в завистмости от среды разработки
     // const data_url = "http://192.168.1.252:8181/mprint/cart.json";
-    const data_url = "http://localhost:8181/mprintinit"; // разработка на iPC
+    const data_url = "http://localhost:8182/mprintinit"; // разработка на iPC
     // const data_url = "http://localhost/mprint/cart.json";  // разработка at home
     const response = await fetch(data_url);
     const data = await response.json();
+    // преобразование даты
 
     this.tasks = data;
   },
@@ -150,7 +176,6 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 .logo {
-  /* width: 100%; */
   text-align: center;
   margin: 50px 0;
 }
@@ -279,5 +304,56 @@ textarea {
 }
 .savebutton {
   position: fixed;
+  left: 50px;
+}
+/* .btn {
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: transparent;
+  border: 1px solid #e74c3c;
+  border-radius: 1px;
+  color: #e74c3c;
+  cursor: pointer;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-self: center;
+  -ms-flex-item-align: center;
+  align-self: center;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1;
+  margin: 0px;
+  padding: 0.4em 0.8em 0.4em;
+  text-decoration: none;
+  text-align: center;
+  text-transform: uppercase;
+  font-family: "Montserrat", sans-serif;
+  /* font-weight: 700; */
+/* } */
+/* .btn:hover,
+.btn:focus {
+  color: #fff;
+  outline: 0;
+}
+
+.btn {
+  -webkit-transition: box-shadow 300ms ease-in-out, color 300ms ease-in-out;
+  transition: box-shadow 300ms ease-in-out, color 300ms ease-in-out;
+}
+.btn:hover {
+  box-shadow: 0 0 40px 40px #e74c3c inset;
+} */
+.saveicon {
+  text-decoration: none;
+  /* color: #667b94; */
+  color: #6b6b6b;
+  font-size: 1.1rem;
+}
+.saveicon:hover {
+  color: #e74c3c;
 }
 </style>
