@@ -40,7 +40,7 @@ export default {
   name: "App",
   data() {
     return {
-      version: " 0.7 faw от 12.12.2021 г.",
+      version: " 0.8 fdb от 13.12.2021 г.",
       columns: [
         {
           label: "№",
@@ -90,45 +90,52 @@ export default {
       row: {},
       showSaveButton: false,
       btnY: 0,
+      inputs: [],
     };
   },
   methods: {
     formatDate(val) {
       const date = new Date(val);
       const year = date.getFullYear();
-      const month = date.getMonth() + 1;
-      const day = date.getDate();
+      const month =
+        date.getMonth() < 9 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
+      const day = date.getDate() < 9 ? "0" + date.getDate() : date.getDate();
       return `${day}.${month}.${year}`;
     },
     async saveTask() {
-      // перебор всех inputs в строке таблицы и сохранение элемента в массив tasks
       this.editmode = false;
-      console.log("Сохранение записи...");
-      console.log(JSON.stringify(this.row));
+      const fData = new FormData();
+      fData.append("id", this.row.id);
+      fData.append("username", this.inputs[0].value);
+      fData.append("printer", this.inputs[1].printer);
+      fData.append("cartridge", this.inputs[2].cartridge);
+      fData.append("workstatus", this.inputs[3].workstatus);
+      fData.append("location", this.inputs[4].location);
+      fData.append("datein", this.inputs[5].datein);
+      fData.append("comment", this.inputs[6].comment);
+
       try {
-        const response = await fetch(`http://localhost:8182/mprintupdate`, {
+        let response = await fetch(`http://localhost:8182/mprintupdate`, {
           method: "POST",
-          headers: {
-            'Content-Type': 'application/json;charset=utf-8'
-          },
           mode: "no-cors",
-          
-          body: JSON.stringify(JSON.stringify(this.row)),
+          headers: {
+            "Content-Type": "form-data",
+          },
+          body: fData,
         });
         if (response.ok) {
-          const data = await response.json();
+          let data = await response.json();
           console.log("data: ", data.bd);
         }
       } catch (e) {
-        console.log("e: ", e);
+        console.log("Ошибка запроса /mprintupdate", e);
       }
 
       this.showSaveButton = false;
       // this.appKey++;
     },
     onRowClick(params) {
-      // params.row - row object
-      this.row = params.row;
+      this.row = params.row; //  row object
       // params.pageIndex - index of this row on the current page.
       // params.selected - if selection is enabled this argument
       // indicates selected or not
@@ -137,18 +144,19 @@ export default {
       let currentRow = params.event.target.closest("tr");
 
       if (this.editmode) {
-        console.log("Edit mode on");
+        console.log("Already in edit mode");
       } else {
         this.btnY = params.event.clientY;
-        this.showSaveButton = true;
+        this.showSaveButton = true; // перед первым столбцом добавляется кнопка "Сохранить"
         this.editmode = true;
-        // перед первым столбцом добавляется кнопка "Сохранить"
+
         currentRow.cells[0].innerHTML = params.row.id;
 
         for (let i = 1; i <= 7; i++) {
           let textInput = document.createElement("textarea");
-          // textInput.type = "text";
           textInput.size = "30";
+          textInput.id = this.columns[i].field;
+          textInput.name = this.columns[i].field;
           textInput.value = currentRow.cells[i].textContent;
           currentRow.cells[i].innerHTML = "";
           currentRow.cells[i].append(textInput);
@@ -161,12 +169,9 @@ export default {
     // data_url устанавливается в завистмости от среды разработки
     // const data_url = "http://192.168.1.252:8181/mprint/cart.json";
     const data_url = "http://localhost:8182/mprintinit"; // разработка на iPC
-    // const data_url = "http://localhost/mprint/cart.json";  // разработка at home
     const response = await fetch(data_url);
-    const data = await response.json();
-    // преобразование даты
-
-    this.tasks = data;
+    const result = await response.json();
+    this.tasks = result;
   },
 };
 </script>
