@@ -21,7 +21,6 @@
       theme="polar-bear"
       :paginate="false"
       v-on:row-click="onRowClick"
-      v-on:keyup.enter="saveTask"
     />
   </div>
 
@@ -101,20 +100,35 @@ export default {
         date.getMonth() < 9 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
       const day = date.getDate() < 9 ? "0" + date.getDate() : date.getDate();
       return `${day}.${month}.${year}`;
+
+      // var t = new Date();
+      // var YYYY = t.getFullYear();
+      // var MM = ((t.getMonth() + 1 < 10) ? '0' : '') + (t.getMonth() + 1);
+      // var DD = ((t.getDate() < 10) ? '0' : '') + t.getDate();
+      // var HH = ((t.getHours() < 10) ? '0' : '') + t.getHours();
+      // var mm = ((t.getMinutes() < 10) ? '0' : '') + t.getMinutes();
+      // var ss = ((t.getSeconds() < 10) ? '0' : '') + t.getSeconds();
+
+      // var time_of_call = YYYY+'-'+MM+'-'+DD+' '+HH+':'+mm+':'+ss;
+
+      // new Date().toISOString().slice(0, 19).replace('T', ' ');
+
     },
     async saveTask() {
       this.editmode = false;
+
       const fData = new FormData();
       fData.append("id", this.row.id);
       fData.append("username", this.inputs[0].value);
-      fData.append("printer", this.inputs[1].printer);
-      fData.append("cartridge", this.inputs[2].cartridge);
-      fData.append("workstatus", this.inputs[3].workstatus);
-      fData.append("location", this.inputs[4].location);
-      fData.append("datein", this.inputs[5].datein);
-      fData.append("comment", this.inputs[6].comment);
+      fData.append("printer", this.inputs[1].value);
+      fData.append("cartridge", this.inputs[2].value);
+      fData.append("workstatus", this.inputs[3].value);
+      fData.append("location", this.inputs[4].value);
+      fData.append("datein", this.inputs[5].value);
+      fData.append("comment", this.inputs[6].value);
 
       try {
+        // if (this.row.id === "+") fetch  /mprintnew
         let response = await fetch(`http://localhost:8182/mprintupdate`, {
           method: "POST",
           mode: "no-cors",
@@ -125,14 +139,15 @@ export default {
         });
         if (response.ok) {
           let data = await response.json();
-          console.log("data: ", data.bd);
+          console.log('data: ', data);
         }
       } catch (e) {
         console.log("Ошибка запроса /mprintupdate", e);
       }
 
       this.showSaveButton = false;
-      // this.appKey++;
+      this.inputs = [];
+      this.appKey++;
     },
     onRowClick(params) {
       this.row = params.row; //  row object
@@ -172,6 +187,7 @@ export default {
     const response = await fetch(data_url);
     const result = await response.json();
     this.tasks = result;
+    this.tasks.push({id: "+"});
   },
 };
 </script>
