@@ -39,7 +39,7 @@ export default {
   name: "App",
   data() {
     return {
-      version: " 0.8 fdb от 13.12.2021 г.",
+      version: " 0.9 от 16.12.2021 г.",
       columns: [
         {
           label: "№",
@@ -72,7 +72,7 @@ export default {
         {
           label: "Дата",
           field: "datein",
-          type: "date",
+          // type: "date",
           filterable: true,
           formatFn: this.formatDate,
         },
@@ -112,7 +112,6 @@ export default {
       // var time_of_call = YYYY+'-'+MM+'-'+DD+' '+HH+':'+mm+':'+ss;
 
       // new Date().toISOString().slice(0, 19).replace('T', ' ');
-
     },
     async saveTask() {
       this.editmode = false;
@@ -139,7 +138,7 @@ export default {
         });
         if (response.ok) {
           let data = await response.json();
-          console.log('data: ', data);
+          console.log("data: ", data);
         }
       } catch (e) {
         console.log("Ошибка запроса /mprintupdate", e);
@@ -150,6 +149,23 @@ export default {
       this.appKey++;
     },
     onRowClick(params) {
+      function insertInput(field, cell, type) {
+        let textInput = document.createElement("input");
+        let content = cell.textContent;
+        if (type) {
+          textInput.type = "date";
+          const datesplit = cell.textContent.split(".");
+          content = `${datesplit[2]}-${datesplit[1]}-${datesplit[0]}`;
+        }
+        textInput.size = cell.textContent.length || 10;
+        textInput.id = field;
+        textInput.name = field;
+        textInput.value = content;
+        cell.innerHTML = "";
+        cell.append(textInput);
+        return;
+      }
+
       this.row = params.row; //  row object
       // params.pageIndex - index of this row on the current page.
       // params.selected - if selection is enabled this argument
@@ -167,17 +183,16 @@ export default {
 
         currentRow.cells[0].innerHTML = params.row.id;
 
-        for (let i = 1; i <= 7; i++) {
-          let textInput = document.createElement("textarea");
-          textInput.size = "30";
-          textInput.id = this.columns[i].field;
-          textInput.name = this.columns[i].field;
-          textInput.value = currentRow.cells[i].textContent;
-          currentRow.cells[i].innerHTML = "";
-          currentRow.cells[i].append(textInput);
+        for (let i = 1; i < currentRow.cells.length; i++) {
+          if (i != 6) {
+            // 6 - date column number
+            insertInput(this.columns[i].field, currentRow.cells[i]);
+          } else {
+            insertInput(this.columns[i].field, currentRow.cells[i], "date");
+          }
         }
       }
-      this.inputs = [...document.querySelectorAll("textarea")];
+      this.inputs = [...document.querySelectorAll("input")];
     },
   },
   async created() {
@@ -187,7 +202,7 @@ export default {
     const response = await fetch(data_url);
     const result = await response.json();
     this.tasks = result;
-    this.tasks.push({id: "+"});
+    this.tasks.push({ id: "+" });
   },
 };
 </script>
@@ -299,13 +314,16 @@ body {
 }
 input {
   border: none;
-  border-bottom: 1px solid rgb(255, 171, 138);
+  border-bottom: 1px dotted rgb(255, 171, 138);
   margin: 0;
   padding: 0;
   display: block;
   outline: none;
   color: rgb(231, 45, 45);
   font-size: 1em;
+}
+input[type="date"] {
+  font-family: Arial, Helvetica, sans-serif;
 }
 textarea {
   border: none;
