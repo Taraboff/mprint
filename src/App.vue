@@ -1,20 +1,14 @@
 <template>
   <div class="container">
-    <div class="title">Отслеживание статуса заправки и ремонта картриджей</div>
+    <div class="title">Отслеживание статуса заявки на заправку и ремонт картриджей</div>
     <div class="logo">
       <img class="imglogo" src="./assets/logo2.png" alt="logo" />
     </div>
   </div>
-  <div
-    class="savebutton"
-    :style="{ top: btnY + 'px' }"
-    v-if="showSaveButton"
-    @click="saveTask"
-  >
-    <a href="" class="saveicon far fa-save"></a>
-  </div>
+
   <div class="contain">
     <vue-good-table
+      ref="vgt"
       :columns="columns"
       :rows="tasks"
       :key="appKey"
@@ -26,20 +20,67 @@
 
   <div class="date">Информация обновлена 03.11.2021 г. 09:50</div>
   <div class="date">Версия{{ version }}</div>
+
+  <modal ref="modalName">
+    <template v-slot:header>
+      <h4>Редактирование заявки №{{ row.id }}</h4>
+    </template>
+
+    <template v-slot:body>
+      <label for="username">Пользователь:</label>
+      <input name="username" v-model="this.row.username" />
+      <label for="printer">Модель принтера:</label>
+      <input name="printer" v-model="this.row.printer" />
+      <label for="cartridge">Тип картриджа:</label>
+      <input name="cartridge" v-model="this.row.cartridge" />
+      <label for="location">Местонахождение принтера / МФУ:</label>
+      <input name="location" v-model="this.row.location" />
+      <label for="workstatus">Статус работы:</label>
+      <input name="workstatus" v-model="this.row.workstatus" />
+      <label for="datein">Дата приемки на заправку/ремонт:</label>
+      <input name="datein" v-model="this.formatDateIn" type="date" size="15"/>
+      <label for="comment">Комментарий:</label>
+      <input name="comment" v-model="this.row.comment" />
+    </template>
+
+    <template v-slot:footer>
+      <div
+        class="modal-footer d-flex align-items-center justify-content-between"
+      >
+        <button
+          class="btn btn--secondary"
+          @click="$refs.modalName.closeModal(true)"   
+        >
+          Отмена
+        </button>
+        <button class="btn btn--primary" @click="saveTask()">Сохранить</button>
+      </div>
+    </template>
+  </modal>
 </template>
 
 <script>
 import { VueGoodTable } from "vue-good-table-next";
 import "vue-good-table-next/dist/vue-good-table-next.css";
+import Modal from "./components/Modal";
+import { ref } from "vue";
 
 export default {
   components: {
     VueGoodTable,
+    Modal,
   },
+
   name: "App",
+  setup() {
+    const row = ref({});
+    return {
+      row,
+    };
+  },
   data() {
     return {
-      version: " 0.9 от 16.12.2021 г.",
+      version: " 0.9.5 vfm от 17.12.2021 г.",
       columns: [
         {
           label: "№",
@@ -74,7 +115,7 @@ export default {
           field: "datein",
           // type: "date",
           filterable: true,
-          formatFn: this.formatDate,
+          formatFn: this.viewDateFn,
         },
         {
           label: "Примечание",
@@ -84,47 +125,33 @@ export default {
       ],
       appKey: 0,
       tasks: [],
-      counts: "",
-      editmode: false,
-      row: {},
-      showSaveButton: false,
-      btnY: 0,
-      inputs: [],
     };
   },
   methods: {
-    formatDate(val) {
-      const date = new Date(val);
+    parseDate(dt) {
+      const date = new Date(dt);
       const year = date.getFullYear();
       const month =
         date.getMonth() < 9 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
       const day = date.getDate() < 9 ? "0" + date.getDate() : date.getDate();
-      return `${day}.${month}.${year}`;
-
-      // var t = new Date();
-      // var YYYY = t.getFullYear();
-      // var MM = ((t.getMonth() + 1 < 10) ? '0' : '') + (t.getMonth() + 1);
-      // var DD = ((t.getDate() < 10) ? '0' : '') + t.getDate();
-      // var HH = ((t.getHours() < 10) ? '0' : '') + t.getHours();
-      // var mm = ((t.getMinutes() < 10) ? '0' : '') + t.getMinutes();
-      // var ss = ((t.getSeconds() < 10) ? '0' : '') + t.getSeconds();
-
-      // var time_of_call = YYYY+'-'+MM+'-'+DD+' '+HH+':'+mm+':'+ss;
-
-      // new Date().toISOString().slice(0, 19).replace('T', ' ');
+      return { day: day, month: month, year: year };
     },
-    async saveTask() {
-      this.editmode = false;
 
+    viewDateFn(val) {
+      const date = this.parseDate(val);
+      return `${date.day}.${date.month}.${date.year}`;
+    },
+
+    async saveTask() {
       const fData = new FormData();
       fData.append("id", this.row.id);
-      fData.append("username", this.inputs[0].value);
-      fData.append("printer", this.inputs[1].value);
-      fData.append("cartridge", this.inputs[2].value);
-      fData.append("workstatus", this.inputs[3].value);
-      fData.append("location", this.inputs[4].value);
-      fData.append("datein", this.inputs[5].value);
-      fData.append("comment", this.inputs[6].value);
+      fData.append("username", this.row.username);
+      fData.append("printer", this.row.printer);
+      fData.append("cartridge", this.row.cartridge);
+      fData.append("workstatus", this.row.workstatus);
+      fData.append("location", this.row.location);
+      fData.append("datein", this.formatDateIn);
+      fData.append("comment", this.row.comment);
 
       try {
         // if (this.row.id === "+") fetch  /mprintnew
@@ -144,55 +171,27 @@ export default {
         console.log("Ошибка запроса /mprintupdate", e);
       }
 
-      this.showSaveButton = false;
-      this.inputs = [];
-      this.appKey++;
+      this.$refs.modalName.closeModal(false);
     },
     onRowClick(params) {
-      function insertInput(field, cell, type) {
-        let textInput = document.createElement("input");
-        let content = cell.textContent;
-        if (type) {
-          textInput.type = "date";
-          const datesplit = cell.textContent.split(".");
-          content = `${datesplit[2]}-${datesplit[1]}-${datesplit[0]}`;
-        }
-        textInput.size = cell.textContent.length || 10;
-        textInput.id = field;
-        textInput.name = field;
-        textInput.value = content;
-        cell.innerHTML = "";
-        cell.append(textInput);
-        return;
-      }
+      this.$refs.modalName.openModal();
 
       this.row = params.row; //  row object
       // params.pageIndex - index of this row on the current page.
       // params.selected - if selection is enabled this argument
       // indicates selected or not
       // params.event - click event
-
-      let currentRow = params.event.target.closest("tr");
-
-      if (this.editmode) {
-        console.log("Already in edit mode");
-      } else {
-        this.btnY = params.event.clientY;
-        this.showSaveButton = true; // перед первым столбцом добавляется кнопка "Сохранить"
-        this.editmode = true;
-
-        currentRow.cells[0].innerHTML = params.row.id;
-
-        for (let i = 1; i < currentRow.cells.length; i++) {
-          if (i != 6) {
-            // 6 - date column number
-            insertInput(this.columns[i].field, currentRow.cells[i]);
-          } else {
-            insertInput(this.columns[i].field, currentRow.cells[i], "date");
-          }
-        }
-      }
-      this.inputs = [...document.querySelectorAll("input")];
+    },
+  },
+  computed: {
+    formatDateIn: {
+      get() {
+        const date = this.parseDate(this.row.datein);
+        return `${date.year}-${date.month}-${date.day}`;
+      },
+      set(newdate) {
+        this.row.datein = newdate;
+      },
     },
   },
   async created() {
@@ -312,6 +311,11 @@ body {
   outline: 0;
   outline-offset: 0;
 }
+label {
+  font-size: 0.8em;
+  color: #6b6b6b;
+  margin: 0.9em 0 0.5em;
+}
 input {
   border: none;
   border-bottom: 1px dotted rgb(255, 171, 138);
@@ -324,6 +328,7 @@ input {
 }
 input[type="date"] {
   font-family: Arial, Helvetica, sans-serif;
+  width: 28%;
 }
 textarea {
   border: none;
@@ -345,47 +350,6 @@ textarea {
   position: fixed;
   left: 50px;
 }
-/* .btn {
-  box-sizing: border-box;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  background-color: transparent;
-  border: 1px solid #e74c3c;
-  border-radius: 1px;
-  color: #e74c3c;
-  cursor: pointer;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-self: center;
-  -ms-flex-item-align: center;
-  align-self: center;
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 1;
-  margin: 0px;
-  padding: 0.4em 0.8em 0.4em;
-  text-decoration: none;
-  text-align: center;
-  text-transform: uppercase;
-  font-family: "Montserrat", sans-serif;
-  /* font-weight: 700; */
-/* } */
-/* .btn:hover,
-.btn:focus {
-  color: #fff;
-  outline: 0;
-}
-
-.btn {
-  -webkit-transition: box-shadow 300ms ease-in-out, color 300ms ease-in-out;
-  transition: box-shadow 300ms ease-in-out, color 300ms ease-in-out;
-}
-.btn:hover {
-  box-shadow: 0 0 40px 40px #e74c3c inset;
-} */
 .saveicon {
   text-decoration: none;
   /* color: #667b94; */
@@ -394,5 +358,49 @@ textarea {
 }
 .saveicon:hover {
   color: #e74c3c;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 5px;
+}
+.btn--primary {
+  background-color: #e74c3c;
+  color: #fff;
+}
+.btn--secondary {
+  background-color: #dddd;
+  color: #000;
+}
+
+/*  utilities */
+.overflow-hidden {
+  overflow: hidden;
+}
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+/* // reset */
+button {
+  background: none;
+  border: none;
+  outline: inherit;
+  cursor: pointer;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
 }
 </style>
