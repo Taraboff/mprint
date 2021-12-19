@@ -1,6 +1,8 @@
 <template>
   <div class="container">
-    <div class="title">Отслеживание статуса заявки на заправку и ремонт картриджей</div>
+    <div class="title">
+      Отслеживание статуса заявки на заправку и ремонт картриджей
+    </div>
     <div class="logo">
       <img class="imglogo" src="./assets/logo2.png" alt="logo" />
     </div>
@@ -17,13 +19,19 @@
       v-on:row-click="onRowClick"
     />
   </div>
+  <button class="btn-new" @click="addnew()">
+    <i class="btn-new fa-solid fa-circle-plus"></i>
+  </button>
 
-  <div class="date">Информация обновлена 03.11.2021 г. 09:50</div>
+  <div class="date">Информация обновлена {{updated}}</div>
   <div class="date">Версия{{ version }}</div>
 
-  <modal ref="modalName">
+  <modal ref="modalEdit">
     <template v-slot:header>
       <h4>Редактирование заявки №{{ row.id }}</h4>
+      <button class="btn-delete" @click="delTask()">
+        <i class="fa-regular fa-trash-can"></i>
+      </button>
     </template>
 
     <template v-slot:body>
@@ -38,18 +46,50 @@
       <label for="workstatus">Статус работы:</label>
       <input name="workstatus" v-model="this.row.workstatus" />
       <label for="datein">Дата приемки на заправку/ремонт:</label>
-      <input name="datein" v-model="this.formatDateIn" type="date" size="15"/>
+      <input name="datein" v-model="this.formatDateIn" type="date" size="15" />
       <label for="comment">Комментарий:</label>
       <input name="comment" v-model="this.row.comment" />
     </template>
 
     <template v-slot:footer>
-      <div
-        class="modal-footer d-flex align-items-center justify-content-between"
-      >
+      <div class="modal-footer">
         <button
           class="btn btn--secondary"
-          @click="$refs.modalName.closeModal(true)"   
+          @click="$refs.modalEdit.closeModal(true)"
+        >
+          Отмена
+        </button>
+        <button class="btn btn--primary" @click="saveTask()">Сохранить</button>
+      </div>
+    </template>
+  </modal>
+  <modal ref="modalNew">
+    <template v-slot:header>
+      <h4>Создание новой заявки</h4>
+    </template>
+
+    <template v-slot:body>
+      <label for="username">Пользователь:</label>
+      <input name="username" v-model="this.row.username" />
+      <label for="printer">Модель принтера:</label>
+      <input name="printer" v-model="this.row.printer" />
+      <label for="cartridge">Тип картриджа:</label>
+      <input name="cartridge" v-model="this.row.cartridge" />
+      <label for="location">Местонахождение принтера / МФУ:</label>
+      <input name="location" v-model="this.row.location" />
+      <label for="workstatus">Статус работы:</label>
+      <input name="workstatus" v-model="this.row.workstatus" />
+      <label for="datein">Дата приемки на заправку/ремонт:</label>
+      <input name="datein" v-model="this.formatDateIn" type="date" size="15" />
+      <label for="comment">Комментарий:</label>
+      <input name="comment" v-model="this.row.comment" />
+    </template>
+
+    <template v-slot:footer>
+      <div class="modal-footer">
+        <button
+          class="btn btn--secondary"
+          @click="$refs.modalNew.closeModal(true)"
         >
           Отмена
         </button>
@@ -64,6 +104,8 @@ import { VueGoodTable } from "vue-good-table-next";
 import "vue-good-table-next/dist/vue-good-table-next.css";
 import Modal from "./components/Modal";
 import { ref } from "vue";
+
+const BD_URL = "http://localhost:8182";
 
 export default {
   components: {
@@ -80,7 +122,7 @@ export default {
   },
   data() {
     return {
-      version: " 0.9.5 vfm от 17.12.2021 г.",
+      version: " 0.9.7 от 19.12.2021 г.",
       columns: [
         {
           label: "№",
@@ -113,7 +155,6 @@ export default {
         {
           label: "Дата",
           field: "datein",
-          // type: "date",
           filterable: true,
           formatFn: this.viewDateFn,
         },
@@ -125,9 +166,31 @@ export default {
       ],
       appKey: 0,
       tasks: [],
+      allowedIp: ['1', '192.168.1.251', '10.80.199.73', '10.80.199.29'],
+      isAdmin: false,
+      updated: '19.12.2021 09:50',
     };
   },
   methods: {
+    async bdinit() {
+      const response = await fetch(`${BD_URL}/mprintinit`);
+      const result = await response.json();
+      this.tasks = result;
+      
+    },
+    async getip() {
+            let response = await fetch(`${BD_URL}/getip`);
+            if (response.ok) {
+                let result = await response.json();
+
+                if (result) {
+                    console.log('result.ip: ', result.ip);
+                    this.isAdmin = this.allowedIp.includes(result.ip);
+                }
+            } else {
+                console.log(`Ошибка init: ${response.status}`);
+            }
+        },
     parseDate(dt) {
       const date = new Date(dt);
       const year = date.getFullYear();
@@ -141,7 +204,32 @@ export default {
       const date = this.parseDate(val);
       return `${date.day}.${date.month}.${date.year}`;
     },
-
+    addnew() {
+      this.row = {
+        id: "",
+        username: "",
+        printer: "",
+        cartridge: "",
+        location: "",
+        workstatus: "",
+        datein: new Date(),
+        comment: "",
+      };
+      this.$refs.modalNew.openModal();
+    },
+    async delTask() {
+      try {
+        let resp = await fetch(`${BD_URL}/mprintdelete/${this.row.id}`);
+        if (resp.ok) {
+          let result = await resp.json();
+          console.log("result: ", result);
+          this.$refs.modalEdit.closeModal(true);
+          this.bdinit();
+        }
+      } catch (e) {
+        console.log("Ошибка запроса /mprintdelete", e);
+      }
+    },
     async saveTask() {
       const fData = new FormData();
       fData.append("id", this.row.id);
@@ -154,8 +242,7 @@ export default {
       fData.append("comment", this.row.comment);
 
       try {
-        // if (this.row.id === "+") fetch  /mprintnew
-        let response = await fetch(`http://localhost:8182/mprintupdate`, {
+        let response = await fetch(`${BD_URL}/mprintupdate`, {
           method: "POST",
           mode: "no-cors",
           headers: {
@@ -171,16 +258,18 @@ export default {
         console.log("Ошибка запроса /mprintupdate", e);
       }
 
-      this.$refs.modalName.closeModal(false);
+      this.$refs.modalEdit.closeModal(false);
+      this.$refs.modalNew.closeModal(false);
+      this.bdinit();
     },
     onRowClick(params) {
-      this.$refs.modalName.openModal();
-
-      this.row = params.row; //  row object
+      this.row = params.row; //  row object - редактируемая запись
       // params.pageIndex - index of this row on the current page.
       // params.selected - if selection is enabled this argument
       // indicates selected or not
       // params.event - click event
+
+      this.$refs.modalEdit.openModal();
     },
   },
   computed: {
@@ -194,14 +283,9 @@ export default {
       },
     },
   },
-  async created() {
-    // data_url устанавливается в завистмости от среды разработки
-    // const data_url = "http://192.168.1.252:8181/mprint/cart.json";
-    const data_url = "http://localhost:8182/mprintinit"; // разработка на iPC
-    const response = await fetch(data_url);
-    const result = await response.json();
-    this.tasks = result;
-    this.tasks.push({ id: "+" });
+  async mounted() {
+    this.bdinit(); // загрузка данные из БД
+    this.getip();
   },
 };
 </script>
@@ -245,6 +329,7 @@ body {
   font-size: 1.2em;
   font-weight: 700;
   text-align: center;
+  color: #6b6b6b;
 }
 .status-table {
   display: flex;
@@ -270,9 +355,10 @@ body {
   color: rgb(34, 175, 53);
 }
 .date {
-  margin-top: 50px;
+  margin-top: 5px;
   text-align: center;
-  font-size: 0.9em;
+  font-size: 0.8em;
+  color: #6b6b6b;
 }
 .table {
   width: 96%;
@@ -314,7 +400,7 @@ body {
 label {
   font-size: 0.8em;
   color: #6b6b6b;
-  margin: 0.9em 0 0.5em;
+  margin: 1.1em 0 0.5em;
 }
 input {
   border: none;
@@ -345,6 +431,22 @@ textarea {
   font-family: Arial, Helvetica, sans-serif;
   color: rgb(231, 45, 45);
   font-size: 1em;
+}
+.btn-new {
+  position: relative;
+  left: 5%;
+  top: 5px;
+  font-size: 1.5em;
+  color: #e74c3c;
+  text-shadow: 1px 1px 2px rgb(179, 177, 177);
+}
+.btn-new:hover {
+  color: #dd4f3f;
+  text-shadow: 1px 1px 2px rgb(255, 255, 255);
+}
+.btn-delete {
+  font-size: 1em;
+  color: #6b6b6b;
 }
 .savebutton {
   position: fixed;
