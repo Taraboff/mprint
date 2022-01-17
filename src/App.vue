@@ -23,7 +23,7 @@
     <i class="btn-new fa-solid fa-circle-plus"></i>
   </button>
 
-  <div class="date">Информация обновлена {{updated}}</div>
+  <div class="date">Информация обновлена {{ updated }}</div>
   <div class="date">Версия{{ version }}</div>
 
   <modal ref="modalEdit">
@@ -105,7 +105,8 @@ import "vue-good-table-next/dist/vue-good-table-next.css";
 import Modal from "./components/Modal";
 import { ref } from "vue";
 
-const BD_URL = "http://localhost:8182";
+// const BD_URL = "http://localhost:8182";
+// const BD_URL = "http://192.168.1.252:8182";
 
 export default {
   components: {
@@ -166,31 +167,32 @@ export default {
       ],
       appKey: 0,
       tasks: [],
-      allowedIp: ['1', '192.168.1.251', '10.80.199.73', '10.80.199.29'],
+      allowedIp: ["1", "192.168.1.251", "10.80.199.73", "10.80.199.29"],
       isAdmin: false,
-      updated: '19.12.2021 09:50',
+      updated: "19.12.2021 09:50",
     };
   },
   methods: {
     async bdinit() {
-      const response = await fetch(`${BD_URL}/mprintinit`);
+      const response = await fetch("/mprintinit"); //${BD_URL}
+
       const result = await response.json();
+      // console.log("result2: ", result2);
       this.tasks = result;
-      
     },
     async getip() {
-            let response = await fetch(`${BD_URL}/getip`);
-            if (response.ok) {
-                let result = await response.json();
+      let response = await fetch("/getip"); //${BD_URL}
+      if (response.ok) {
+        let result = await response.json();
 
-                if (result) {
-                    console.log('result.ip: ', result.ip);
-                    this.isAdmin = this.allowedIp.includes(result.ip);
-                }
-            } else {
-                console.log(`Ошибка init: ${response.status}`);
-            }
-        },
+        if (result) {
+          console.log("result.ip: ", result.ip);
+          this.isAdmin = this.allowedIp.includes(result.ip);
+        }
+      } else {
+        console.log(`Ошибка init: ${response.status}`);
+      }
+    },
     parseDate(dt) {
       const date = new Date(dt);
       const year = date.getFullYear();
@@ -219,7 +221,7 @@ export default {
     },
     async delTask() {
       try {
-        let resp = await fetch(`${BD_URL}/mprintdelete/${this.row.id}`);
+        let resp = await fetch(`/mprintdelete/${this.row.id}`);
         if (resp.ok) {
           let result = await resp.json();
           console.log("result: ", result);
@@ -242,7 +244,7 @@ export default {
       fData.append("comment", this.row.comment);
 
       try {
-        let response = await fetch(`${BD_URL}/mprintupdate`, {
+        let response = await fetch(`/mprintupdate`, {
           method: "POST",
           mode: "no-cors",
           headers: {
