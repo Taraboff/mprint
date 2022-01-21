@@ -19,12 +19,13 @@
       v-on:row-click="onRowClick"
     />
   </div>
-  <button class="btn-new" @click="addnew()">
+  <button v-show="isAdmin" class="btn-new" @click="addnew()">
     <i class="btn-new fa-solid fa-circle-plus"></i>
   </button>
-
-  <div class="date">Информация обновлена {{ updated }}</div>
-  <div class="date">Версия{{ version }}</div>
+  <div class="footer">
+    <div class="date">Информация обновлена {{ updated }}</div>
+    <div class="date">Версия{{ version }}</div>
+  </div>
 
   <modal ref="modalEdit">
     <template v-slot:header>
@@ -105,8 +106,8 @@ import "vue-good-table-next/dist/vue-good-table-next.css";
 import Modal from "./components/Modal";
 import { ref } from "vue";
 
-// const BD_URL = "http://localhost:8182";
-// const BD_URL = "http://192.168.1.252:8182";
+const BACKEND_URL = "http://localhost:8182"; // If DEV
+// const BACKEND_URL = "";  // If PRODUCTION
 
 export default {
   components: {
@@ -123,7 +124,7 @@ export default {
   },
   data() {
     return {
-      version: " 0.9.7 от 19.12.2021 г.",
+      version: " 0.9.8 от 20.01.2022 г.",
       columns: [
         {
           label: "№",
@@ -169,19 +170,19 @@ export default {
       tasks: [],
       allowedIp: ["1", "192.168.1.251", "10.80.199.73", "10.80.199.29"],
       isAdmin: false,
-      updated: "19.12.2021 09:50",
+      updated: "20.01.2022 13:15",
     };
   },
   methods: {
     async bdinit() {
-      const response = await fetch("/mprintinit"); //${BD_URL}
+      const response = await fetch(`${BACKEND_URL}/mprintinit`); //${BACKEND_URL}
 
       const result = await response.json();
       // console.log("result2: ", result2);
       this.tasks = result;
     },
     async getip() {
-      let response = await fetch("/getip"); //${BD_URL}
+      let response = await fetch(`${BACKEND_URL}/getip`); //${${BACKEND_URL}}
       if (response.ok) {
         let result = await response.json();
 
@@ -506,5 +507,8 @@ h4,
 h5,
 h6 {
   margin: 0;
+}
+.footer {
+  margin-top: 40px;
 }
 </style>
