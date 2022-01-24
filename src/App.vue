@@ -17,6 +17,14 @@
       theme="polar-bear"
       :paginate="false"
       v-on:row-click="onRowClick"
+      :sort-options="{
+        enabled: true,
+        multipleColumns: true,
+        initialSortBy: [
+          { field: 'workstatus', type: 'asc' },
+          { field: 'id', type: 'asc' },
+        ],
+      }"
     />
   </div>
   <button v-show="isAdmin" class="btn-new" @click="addnew()">
@@ -222,7 +230,7 @@ export default {
     },
     async delTask() {
       try {
-        let resp = await fetch(`/mprintdelete/${this.row.id}`);
+        let resp = await fetch(`${BACKEND_URL}/mprintdelete/${this.row.id}`);
         if (resp.ok) {
           let result = await resp.json();
           console.log("result: ", result);
@@ -245,7 +253,7 @@ export default {
       fData.append("comment", this.row.comment);
 
       try {
-        let response = await fetch(`/mprintupdate`, {
+        let response = await fetch(`${BACKEND_URL}/mprintupdate`, {
           method: "POST",
           mode: "no-cors",
           headers: {
