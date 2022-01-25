@@ -21,7 +21,7 @@
         enabled: true,
         multipleColumns: true,
         initialSortBy: [
-          { field: 'workstatus', type: 'asc' },
+          { field: 'statuscode', type: 'asc' },
           { field: 'id', type: 'asc' },
         ],
       }"
@@ -87,7 +87,14 @@
       <label for="location">Местонахождение принтера / МФУ:</label>
       <input name="location" v-model="this.row.location" />
       <label for="workstatus">Статус работы:</label>
-      <input name="workstatus" v-model="this.row.workstatus" />
+      <!-- Реализовать через v-for -->
+      <select v-model="this.row.workstatus">
+        <option>{{ this.statuses[0].status }}</option>
+        <option>{{ this.statuses[1].status }}</option>
+        <option>{{ this.statuses[2].status }}</option>
+        <option>{{ this.statuses[3].status }}</option>
+      </select>
+      <!-- <input name="workstatus" v-model="this.row.workstatus" /> -->
       <label for="datein">Дата приемки на заправку/ремонт:</label>
       <input name="datein" v-model="this.formatDateIn" type="date" size="15" />
       <label for="comment">Комментарий:</label>
@@ -153,6 +160,10 @@ export default {
           filterable: true,
         },
         {
+          field: "statuscode",
+          hidden: true,
+        },
+        {
           label: "Статус",
           field: "workstatus",
           filterable: true,
@@ -179,6 +190,12 @@ export default {
       allowedIp: ["1", "192.168.1.251", "10.80.199.73", "10.80.199.29"],
       isAdmin: false,
       updated: "20.01.2022 13:15",
+      statuses: [
+        { code: 30, status: "В ожидании заправки / ремонта" },
+        { code: 40, status: "В работе" },
+        { code: 10, status: "Заправлен" },
+        { code: 20, status: "В резерве" },
+      ],
     };
   },
   methods: {
