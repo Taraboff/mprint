@@ -86,15 +86,13 @@
       <input name="cartridge" v-model="this.row.cartridge" />
       <label for="location">Местонахождение принтера / МФУ:</label>
       <input name="location" v-model="this.row.location" />
+      <input type="hidden" name="statuscode" v-model="this.row.statuscode" />
       <label for="workstatus">Статус работы:</label>
-      <!-- Реализовать через v-for -->
       <select v-model="this.row.workstatus">
-        <option>{{ this.statuses[0].status }}</option>
-        <option>{{ this.statuses[1].status }}</option>
-        <option>{{ this.statuses[2].status }}</option>
-        <option>{{ this.statuses[3].status }}</option>
+        <option v-for="(st, index) in this.statuses" v-bind:key="index">
+          {{ st.status }}
+        </option>
       </select>
-      <!-- <input name="workstatus" v-model="this.row.workstatus" /> -->
       <label for="datein">Дата приемки на заправку/ремонт:</label>
       <input name="datein" v-model="this.formatDateIn" type="date" size="15" />
       <label for="comment">Комментарий:</label>
@@ -239,6 +237,7 @@ export default {
         printer: "",
         cartridge: "",
         location: "",
+        statuscode: "",
         workstatus: "",
         datein: new Date(),
         comment: "",
@@ -265,6 +264,7 @@ export default {
       fData.append("printer", this.row.printer);
       fData.append("cartridge", this.row.cartridge);
       fData.append("workstatus", this.row.workstatus);
+      fData.append("statuscode", this.row.statuscode);
       fData.append("location", this.row.location);
       fData.append("datein", this.formatDateIn);
       fData.append("comment", this.row.comment);
