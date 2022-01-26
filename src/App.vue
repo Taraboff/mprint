@@ -187,9 +187,9 @@ export default {
       tasks: [],
       allowedIp: ["1", "192.168.1.251", "10.80.199.73", "10.80.199.29"],
       isAdmin: false,
-      updated: "20.01.2022 13:15",
+      updated: "26.01.2022 13:57",
       statuses: [
-        { code: 30, status: "В ожидании заправки / ремонта" },
+        { code: 30, status: "В ожидании заправки/ремонта" },
         { code: 40, status: "В работе" },
         { code: 10, status: "Заправлен" },
         { code: 20, status: "В резерве" },
@@ -298,6 +298,11 @@ export default {
       // params.event - click event
 
       this.$refs.modalEdit.openModal();
+    },
+    onChangeStatus() {
+      // перебираем статусы в this.statuses
+      // ищем соответствие выбранному this.workstatus
+      return;
     },
   },
   computed: {
