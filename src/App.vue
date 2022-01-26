@@ -78,6 +78,10 @@
     </template>
 
     <template v-slot:body>
+      <vm-container
+        ><vm-select v-model="this.row.username"></vm-select
+      ></vm-container>
+
       <label for="username">Пользователь:</label>
       <input name="username" v-model="this.row.username" />
       <label for="printer">Модель принтера:</label>
@@ -88,7 +92,11 @@
       <input name="location" v-model="this.row.location" />
       <input type="hidden" name="statuscode" v-model="this.row.statuscode" />
       <label for="workstatus">Статус работы:</label>
-      <select v-model="this.row.workstatus">
+      <select
+        class="select-status"
+        v-model="this.row.workstatus"
+        @change="onChangeStatus()"
+      >
         <option v-for="(st, index) in this.statuses" v-bind:key="index">
           {{ st.status }}
         </option>
@@ -185,7 +193,13 @@ export default {
       ],
       appKey: 0,
       tasks: [],
-      allowedIp: ["1", "192.168.1.251", "10.80.199.73", "10.80.199.29"],
+      allowedIp: [
+        "1",
+        "127.0.0.1",
+        "192.168.1.251",
+        "10.80.199.73",
+        "10.80.199.29",
+      ],
       isAdmin: false,
       updated: "26.01.2022 13:57",
       statuses: [
@@ -300,8 +314,11 @@ export default {
       this.$refs.modalEdit.openModal();
     },
     onChangeStatus() {
-      // перебираем статусы в this.statuses
-      // ищем соответствие выбранному this.workstatus
+      for (let i = 0; i < this.statuses.length; i++) {
+        if (this.row.workstatus === this.statuses[i].status) {
+          this.row.statuscode = this.statuses[i].code;
+        }
+      }
       return;
     },
   },
@@ -445,6 +462,19 @@ input {
   color: rgb(231, 45, 45);
   font-size: 1em;
 }
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+  box-shadow: 0 0 0 30px white inset !important;
+}
 input[type="date"] {
   font-family: Arial, Helvetica, sans-serif;
   width: 28%;
@@ -540,5 +570,31 @@ h6 {
 }
 .footer {
   margin-top: 40px;
+}
+.select-status {
+  display: block;
+  font-size: 1em;
+  font-family: sans-serif;
+  /* font-weight: 700; */
+  color: #444;
+  line-height: 1;
+  padding: 0.3em 1.4em 0.3em 0.8em;
+  width: 70%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  border: 1px dotted rgb(255, 171, 138);
+  /* 1px solid #aaa; */
+  border-radius: 0.2em;
+}
+.select-css:hover {
+  border-color: #888;
+}
+.select-css:focus {
+  border-color: #aaa;
+  box-shadow: 0 0 1px 3px rgba(59, 153, 252, 0.7);
+  box-shadow: 0 0 0 3px -moz-mac-focusring;
+  color: #222;
+  outline: none;
 }
 </style>

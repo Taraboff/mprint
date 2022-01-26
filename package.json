@@ -12,7 +12,8 @@
     "node-sass": "^7.0.0",
     "sass-loader": "^12.4.0",
     "vue": "^3.0.0",
-    "vue-good-table-next": "^0.1.0"
+    "vue-good-table-next": "^0.1.0",
+    "vue3-material": "^1.0.8"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
