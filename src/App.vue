@@ -13,6 +13,7 @@
       ref="vgt"
       :columns="columns"
       :rows="tasks"
+      styleClass="vgt-table striped condensed"
       :key="appKey"
       theme="polar-bear"
       :paginate="false"
@@ -25,13 +26,17 @@
           { field: 'id', type: 'asc' },
         ],
       }"
+      :search-options="{
+        enabled: true,
+        placeholder: 'Поиск по таблице',
+      }"
     />
   </div>
   <button v-show="isAdmin" class="btn-new" @click="addnew()">
     <i class="btn-new fa-solid fa-circle-plus"></i>
   </button>
   <div class="footer">
-    <div class="date">Информация обновлена {{ updated }}</div>
+    <!-- <div class="date">Информация обновлена {{ updated }}</div> -->
     <div class="date">Версия{{ version }}</div>
   </div>
 
@@ -52,8 +57,17 @@
       <input name="cartridge" v-model="this.row.cartridge" />
       <label for="location">Местонахождение принтера / МФУ:</label>
       <input name="location" v-model="this.row.location" />
+      <input type="hidden" name="statuscode" v-model="this.row.statuscode" />
       <label for="workstatus">Статус работы:</label>
-      <input name="workstatus" v-model="this.row.workstatus" />
+      <select
+        class="select-status"
+        v-model="this.row.workstatus"
+        @change="onChangeStatus()"
+      >
+        <option v-for="(st, index) in this.statuses" v-bind:key="index">
+          {{ st.status }}
+        </option>
+      </select>
       <label for="datein">Дата приемки на заправку/ремонт:</label>
       <input name="datein" v-model="this.formatDateIn" type="date" size="15" />
       <label for="comment">Комментарий:</label>
@@ -78,10 +92,6 @@
     </template>
 
     <template v-slot:body>
-      <vm-container
-        ><vm-select v-model="this.row.username"></vm-select
-      ></vm-container>
-
       <label for="username">Пользователь:</label>
       <input name="username" v-model="this.row.username" />
       <label for="printer">Модель принтера:</label>
@@ -145,7 +155,7 @@ export default {
   },
   data() {
     return {
-      version: " 0.9.8 от 20.01.2022 г.",
+      version: " 0.9.8 от 29.01.2022 г.",
       columns: [
         {
           label: "№",
@@ -173,6 +183,7 @@ export default {
           label: "Статус",
           field: "workstatus",
           filterable: true,
+          tdClass: this.tdClassFunc,
         },
         {
           label: "Местонахождение",
@@ -193,29 +204,36 @@ export default {
       ],
       appKey: 0,
       tasks: [],
-      allowedIp: [
-        "1",
-        "127.0.0.1",
-        "192.168.1.251",
-        "10.80.199.73",
-        "10.80.199.29",
-      ],
+      allowedIp: ["1", "127.0.0.1", "192.168.1.251", "10.80.199.73"],
       isAdmin: false,
-      updated: "26.01.2022 13:57",
+      client: "",
+      updated: "29.01.2022 16:59",
       statuses: [
         { code: 30, status: "В ожидании заправки/ремонта" },
         { code: 40, status: "В работе" },
         { code: 10, status: "Заправлен" },
-        { code: 20, status: "В резерве" },
+        { code: 20, status: "Поставлен в резерв" },
       ],
     };
   },
   methods: {
+    tdClassFunc(row) {
+      switch (row.statuscode) {
+        case 10:
+          return "green-status";
+        case 20:
+          return "orange-status";
+        case 30:
+        case 40:
+          return "red-status";
+      }
+    },
     async bdinit() {
-      const response = await fetch(`${BACKEND_URL}/mprintinit`); //${BACKEND_URL}
+      const response = await fetch(`${BACKEND_URL}/mprint/init`); //${BACKEND_URL}
 
       const result = await response.json();
-      // console.log("result2: ", result2);
+      // console.log('result: ', result);
+
       this.tasks = result;
     },
     async getip() {
@@ -224,7 +242,7 @@ export default {
         let result = await response.json();
 
         if (result) {
-          console.log("result.ip: ", result.ip);
+          this.client = result.ip;
           this.isAdmin = this.allowedIp.includes(result.ip);
         }
       } else {
@@ -259,11 +277,17 @@ export default {
       this.$refs.modalNew.openModal();
     },
     async delTask() {
+      const msg = `Удаление записи: id:${this.row.id}_user:${this.row.username}_model:${this.row.printer}_cartridge:${this.row.cartridge}
+_status:${this.row.workstatus}_location:${this.row.location}_description:${this.row.comment}_date:${this.formatDateIn}`;
+
       try {
         let resp = await fetch(`${BACKEND_URL}/mprintdelete/${this.row.id}`);
         if (resp.ok) {
           let result = await resp.json();
-          console.log("result: ", result);
+          console.log("Запись успешно удалена: ", result);
+
+          this.savelog(msg);
+
           this.$refs.modalEdit.closeModal(true);
           this.bdinit();
         }
@@ -292,13 +316,19 @@ export default {
           },
           body: fData,
         });
+
         if (response.ok) {
           let data = await response.json();
-          console.log("data: ", data);
+          console.log("Данные сохранены: ", data);
         }
       } catch (e) {
         console.log("Ошибка запроса /mprintupdate", e);
       }
+
+      const msg = `Сохранение записи: id:${this.row.id}_user:${this.row.username}_model:${this.row.printer}_cartridge:${this.row.cartridge}
+_status:${this.row.workstatus}_location:${this.row.location}_description:${this.row.comment}_date:${this.formatDateIn}`;
+
+      this.savelog(msg);
 
       this.$refs.modalEdit.closeModal(false);
       this.$refs.modalNew.closeModal(false);
@@ -310,7 +340,7 @@ export default {
       // params.selected - if selection is enabled this argument
       // indicates selected or not
       // params.event - click event
-
+      if (!this.isAdmin) return;
       this.$refs.modalEdit.openModal();
     },
     onChangeStatus() {
@@ -320,6 +350,40 @@ export default {
         }
       }
       return;
+    },
+    async savelog(description) {
+      // определяем текущее время
+      const datetime = new Date().toISOString().slice(0, 19).replace("T", " ");
+      const fData = new FormData();
+      fData.append("description", description);
+      fData.append("datetime", datetime);
+      fData.append("client", this.client);
+
+      try {
+        await fetch(`${BACKEND_URL}/mprint/savelog`, {
+          method: "POST",
+          mode: "no-cors",
+          body: fData,
+          headers: {
+            "Content-Type": "form-data",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Success:", data);
+          });
+
+        // console.log("response.status: ", response.status);
+
+        // if (response.status < 200 || response.status >= 300) {
+        //   throw new Error(`Запрос отклонен со статусом ${response.status}`)
+        // }
+        // await response.json();
+
+        // здесь запрос в log о последнем изменении
+      } catch (error) {
+        console.error("Ошибка logging:", error);
+      }
     },
   },
   computed: {
@@ -334,8 +398,8 @@ export default {
     },
   },
   async mounted() {
-    this.bdinit(); // загрузка данные из БД
     this.getip();
+    this.bdinit(); // загрузка данные из БД
   },
 };
 </script>
@@ -578,7 +642,7 @@ h6 {
   /* font-weight: 700; */
   color: #444;
   line-height: 1;
-  padding: 0.3em 1.4em 0.3em 0.8em;
+  padding: 0.2em 1.4em 0.1em 0.4em;
   width: 70%;
   max-width: 100%;
   box-sizing: border-box;
