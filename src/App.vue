@@ -23,7 +23,7 @@
         multipleColumns: true,
         initialSortBy: [
           { field: 'statuscode', type: 'asc' },
-          { field: 'id', type: 'asc' },
+          { field: 'datein', type: 'asc' },
         ],
       }"
       :search-options="{
@@ -36,7 +36,7 @@
     <i class="btn-new fa-solid fa-circle-plus"></i>
   </button>
   <div class="footer">
-    <!-- <div class="date">Информация обновлена {{ updated }}</div> -->
+    <div class="date">Информация обновлена {{ updated }}</div>
     <div class="date">Версия{{ version }}</div>
   </div>
 
@@ -138,7 +138,7 @@ import Modal from "./components/Modal";
 import { ref } from "vue";
 
 const BACKEND_URL = "http://localhost:8182"; // If DEV
-// const BACKEND_URL = "";  // If PRODUCTION
+// const BACKEND_URL = ""; // If PRODUCTION
 
 export default {
   components: {
@@ -155,7 +155,7 @@ export default {
   },
   data() {
     return {
-      version: " 0.9.8 от 29.01.2022 г.",
+      version: " 0.9.9 от 04.02.2022 г.",
       columns: [
         {
           label: "№",
@@ -207,7 +207,7 @@ export default {
       allowedIp: ["1", "127.0.0.1", "192.168.1.251", "10.80.199.73"],
       isAdmin: false,
       client: "",
-      updated: "29.01.2022 16:59",
+      updated: "04.02.2022 14:50",
       statuses: [
         { code: 30, status: "В ожидании заправки/ремонта" },
         { code: 40, status: "В работе" },
@@ -232,9 +232,11 @@ export default {
       const response = await fetch(`${BACKEND_URL}/mprint/init`); //${BACKEND_URL}
 
       const result = await response.json();
-      // console.log('result: ', result);
+      // console.log("result: ", result[0]);
 
-      this.tasks = result;
+      this.tasks = await result[1];
+      this.updated = await result[0][0].datetime;
+      // console.log("result[0]: ", result[0][0].datetime);
     },
     async getip() {
       let response = await fetch(`${BACKEND_URL}/getip`); //${${BACKEND_URL}}

@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS `logs` (
   `client` char(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `description` varchar(256) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
 версия 0.6 vgt
@@ -59,3 +59,6 @@ CREATE TABLE IF NOT EXISTS `logs` (
 Права на внесение изменений есть только с разрешенных ip-адресов.
 Добавлена возможность изменять статус в окне редактирования заявки.
 Добавлен журнал операций сохранения и удаления записей.
+
+Версия 0.9.9 от 04.02.2022 г.
+Изменены параметры сотрировки вывода записей
